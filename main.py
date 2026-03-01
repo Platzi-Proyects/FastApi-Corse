@@ -11,13 +11,22 @@ app = FastAPI()
 
 # Date Time Endpoints
 
-from datetime import datetime, date, timedelta
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
-@app.get("/")
-async def root():
+currentTimezone = {
+    "EST": "America/New_York",
+    "PST": "America/Los_Angeles",
+    "GMT": "Europe/London",
+    "UTC": "UTC",
+    "IST": "Asia/Kolkata"
+}
+
+@app.get("/{iso_str}")
+async def root(iso_str: str):
+    iso = iso_str.upper()
+    timesome_str = currentTimezone.get(iso)
+    tz = ZoneInfo(timesome_str)
     return {
-        "date": date.today(),
-        "time": datetime.now().time(),
-        "datetime": datetime.now(),
-        "timedelta": timedelta(days=1)
+        "time": datetime.now(tz).isoformat(),
     }

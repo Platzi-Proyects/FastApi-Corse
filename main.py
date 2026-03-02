@@ -42,6 +42,15 @@ async def create_user(customerCreate: ClientPrototipy):
     db_clients.append(customer)
     return customer
 
+@app.get("/client", response_model=list[Client])
+async def get_clients():
+    return db_clients
+
+@app.post("/client/{id}")
+async def get_customer_Id(id: int):
+    return db_clients[id]
+
+
 @app.post("/sale")
 async def create_sale(sale: Sale):
     return sale

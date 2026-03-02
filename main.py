@@ -1,6 +1,5 @@
 # Fist Steps
 
-from pydantic import BaseModel, EmailStr
 from fastapi import FastAPI
 
 app = FastAPI()
@@ -32,14 +31,21 @@ app = FastAPI()
 #         "time": datetime.now(tz).isoformat(),
 #     }
 
-from typing import Optional
+from models import Client, Sale, Invoice, ClientPrototipy
 
-class User(BaseModel):
-    name: str
-    email: EmailStr
-    age: Optional[int] = None
+db_clients: list[Client] = []
 
-@app.post("/user")
-async def create_user(user: User):
-    return user
-    
+@app.post("/client", response_model=Client)
+async def create_user(customerCreate: ClientPrototipy):
+    new_id = len(db_clients)
+    customer = Client(id=new_id, **customerCreate.model_dump())
+    db_clients.append(customer)
+    return customer
+
+@app.post("/sale")
+async def create_sale(sale: Sale):
+    return sale
+
+@app.post("/invoice")
+async def create_invoice(invoice: Invoice):
+    return invoice

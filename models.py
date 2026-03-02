@@ -1,14 +1,17 @@
-from pydantic import BaseModel, EmailStr, Field
+from pydantic import BaseModel, EmailStr
 from typing import Optional
+from sqlmodel import SQLModel, Field
 
-class ClientPrototipy(BaseModel):
-    name: str
-    email: EmailStr
-    age: int
+class ClientPrototipy(SQLModel):
+    name: str = Field(default=None)
+    email: EmailStr = Field(default=None)
+    age: int = Field(default=None)
     description: Optional[str] = None
 
-class Client(ClientPrototipy):
-    id: int = Field(default=None)
+class Client(ClientPrototipy, table=True):
+    id: Optional[int] = Field(default=None, primary_key=True)
+
+
 
 class Sale(BaseModel):
     id: int

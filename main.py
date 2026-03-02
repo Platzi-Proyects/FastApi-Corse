@@ -1,8 +1,11 @@
 # Fist Steps
 
-from fastapi import FastAPI
+from sqlmodel import select
+from fastapi import FastAPI, HTTPException, status
+from dbport import SessionDep, create_all_tables
 
-app = FastAPI()
+app = FastAPI(lifespan=create_all_tables)
+
 
 
 # @app.get("/")
@@ -33,22 +36,24 @@ app = FastAPI()
 
 from models import Client, Sale, Invoice, ClientPrototipy
 
-db_clients: list[Client] = []
-
 @app.post("/client", response_model=Client)
-async def create_user(customerCreate: ClientPrototipy):
-    new_id = len(db_clients)
-    customer = Client(id=new_id, **customerCreate.model_dump())
-    db_clients.append(customer)
+async def create_user(customerCreate: ClientPrototipy, session: SessionDep):
+    customer = Client.model_validate(customerCreate.model_dump())
+    session.add(customer)
+    session.commit()
+    session.refresh(customer)
     return customer
 
 @app.get("/client", response_model=list[Client])
-async def get_clients():
-    return db_clients
+async def get_clients(session: SessionDep):
+    return session.exec(select(Client)).all()
 
-@app.post("/client/{id}")
-async def get_customer_Id(id: int):
-    return db_clients[id]
+@app.get("/client/{id}")
+async def get_customer_Id(id: int, session: SessionDep):
+    if not session.get(Client, id):
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+    return session.get(Client, id)
+
 
 
 @app.post("/sale")

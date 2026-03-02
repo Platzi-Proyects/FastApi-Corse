@@ -1,3 +1,7 @@
 fastapi
 uvicorn
 email-validator
+sqlmodel
+python-dotenv
+pymysql
+psycopg2-binary

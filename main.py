@@ -34,7 +34,7 @@ app = FastAPI(lifespan=create_all_tables)
 #         "time": datetime.now(tz).isoformat(),
 #     }
 
-from models import Client, Sale, Invoice, ClientPrototipy
+from models import Client, Sale, Invoice, ClientPrototipy, ClientUpdate
 
 @app.post("/client", response_model=Client)
 async def create_user(customerCreate: ClientPrototipy, session: SessionDep):
@@ -63,7 +63,31 @@ async def delete_customer(id: int, session: SessionDep):
     session.commit()
     return {"message": "Client deleted"}
 
+@app.put("/client/{id}")
+async def update_customer(id: int, customerUpdate: ClientPrototipy, session: SessionDep):
+    customer = session.get(Client, id)
+    if not customer:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+    customer.name = customerUpdate.name
+    customer.email = customerUpdate.email
+    customer.age = customerUpdate.age
+    customer.description = customerUpdate.description
+    session.add(customer)
+    session.commit()
+    session.refresh(customer)
+    return customer
 
+@app.patch("/client/{id}", status_code=status.HTTP_201_CREATED)
+async def patch_customer(id: int, customerUpdate: ClientUpdate, session: SessionDep):
+    customer = session.get(Client, id)
+    if not customer:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Client not found")
+    customer_data_updated = customerUpdate.model_dump(exclude_unset=True)
+    customer.sqlmodel_update(customer_data_updated)
+    session.add(customer)
+    session.commit()
+    session.refresh(customer)
+    return customer
 
 @app.post("/sale")
 async def create_sale(sale: Sale):

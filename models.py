@@ -11,6 +11,12 @@ class ClientPrototipy(SQLModel):
 class Client(ClientPrototipy, table=True):
     id: Optional[int] = Field(default=None, primary_key=True)
 
+class ClientUpdate(SQLModel):
+    name: Optional[str] = None
+    email: Optional[EmailStr] = None
+    age: Optional[int] = None
+    description: Optional[str] = None
+
 
 
 class Sale(BaseModel):
